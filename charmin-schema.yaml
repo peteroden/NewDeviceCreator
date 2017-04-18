@@ -1,0 +1,16 @@
+connectionstring: HostName=PandG-IoTHub.azure-devices.net;DeviceId=Pete-D1mini;SharedAccessKey=wyEE2XUiaNCcSj37T9xQrFAGng0STXQjN0Pv9nXXSjQ=
+protocol: http
+location: eastus
+namespace:
+  name: charmin
+  models:
+    toiletpaperrollsensor:
+      data:
+        DeviceId: ascii_char_ptr
+        AmountRemaining: int
+        BatteryRemaining: int
+      actions:
+        TurnLightOn:
+          parameters:
+            brightness: int
+        TurnLightOff:

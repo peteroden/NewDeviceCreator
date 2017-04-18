@@ -1,0 +1,17 @@
+connectionstring: HostName=PandG-IoTHub.azure-devices.net;DeviceId=Pete-D1mini;SharedAccessKey=wyEE2XUiaNCcSj37T9xQrFAGng0STXQjN0Pv9nXXSjQ=
+namespace:
+  name: febreeze
+  models:
+    febreezeconnect:
+      data:
+        DeviceId: ascii_char_ptr
+        AmountRemaining: int
+      actions:
+        TurnFanOn:
+          parameters:
+        TurnFanOff:
+        TurnAlertOn:
+        TurnAlertOff:
+        SetOilTemerature:
+          parameters:
+            temperature: int
