@@ -1,17 +1,17 @@
 {
-  "name": "newdevicecreator",
+  "name": "iothub-maker",
   "version": "1.0.0",
-  "description": "",
-  "main": "newDeviceCreator.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "author": "",
-  "license": "ISC",
+  "description": "Azure IoT Hub Maker",
+  "author": "Pete Roden",
+  "main": "iothub-maker.js",
+  "bin": "iothub-maker.js",
+  "license": "MIT",
   "dependencies": {
     "async": "^2.3.0",
-    "azure-arm-iothub": "^1.0.0-preview",
     "azure-arm-resource": "^2.0.0-preview",
+    "azure-iothub": "^1.1.9",
+    "colors-tmpl": "^1.0.0",
+    "commander": "^2.9.0",
     "fs-extra": "^2.1.2",
     "js-yaml": "^3.8.3",
     "lodash": "^4.17.4",

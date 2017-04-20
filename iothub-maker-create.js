@@ -1,13 +1,44 @@
+#!/usr/bin/env node
+// Copyright (c) Pete Roden. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+'use strict';
+
+// Native node modules
+var fs = require('fs');
+var path = require('path');
 var util = require('util');
+
+// External dependencies
+var program = require('commander');
 var _ = require('lodash');
-const readline = require('readline');
 var yaml = require('js-yaml');
 var fse = require('fs-extra');
 var path = require('path');
 var async = require('async');
+
+// Local dependencies
+var inputError = require('./common.js').inputError;
+var printSuccess = require('./common.js').printSuccess;
+var configLoc = require('./common.js').configLoc;
+
+// SDK dependencies
 var msRestAzure = require('ms-rest-azure');
 var azureARMClient = require('azure-arm-resource');
 var iothub = require('azure-iothub');
+var ConnectionString = require('azure-iothub').ConnectionString;
+var SharedAccessSignature = require('azure-iothub').SharedAccessSignature;
+
+var info;
+
+program
+  .description('Create an Azure IoT Hub environment.')
+
+  .usage('[options] [schema-json|schema-yaml]')
+  .option('-d, --device <connection-string>', 'Only create the device firmware')
+  .option('-c, --cloud', 'Only create the Azure services')
+  .option('-m, --mobile', 'Only create the mobile app')
+  .parse(process.argv);
 
 var randomIds = {};
 var args = process.argv.slice(2);
@@ -17,30 +48,30 @@ var armClient;
 var cs;
 
 async.waterfall([
-    function(callback) { DeployCloud(callback); },
-    function(output, callback) { CreateFirstDevice(output, callback); },
-    function(output, callback) { CreateDeviceFirmware(output, callback); },
-    function(callback) { CreateMobileApp(); }
-    ]
+  function(callback) { DeployCloud(callback); },
+  function(output, callback) { CreateFirstDevice(output, callback); },
+  function(output, callback) { CreateDeviceFirmware(output, callback); },
+  function(callback) { CreateMobileApp(); }
+]
 );
 
 function CreateFirstDevice(output, callback) {
-    //var connectiostring = cs.iotHubConnectionString.value;
-    var connectionString = output.iotHubConnectionString.value;
-    var registry = iothub.Registry.fromConnectionString(connectionString);
+  //var connectiostring = cs.iotHubConnectionString.value;
+  var connectionString = output.iotHubConnectionString.value;
+  var registry = iothub.Registry.fromConnectionString(connectionString);
 
-    // Create a new device
-    var device = {
-        deviceId: _generateRandomId('FirstDevice-', randomIds)
-    };
+  // Create a new device
+  var device = {
+    deviceId: _generateRandomId('FirstDevice-', randomIds)
+  };
 
-    registry.create(device, function(err, deviceInfo, res) {
-        if (err) console.log('error: ' + err.toString());
-        if (res) console.log('status: ' + res.statusCode + ' ' + res.statusMessage);
-        if (deviceInfo) console.log('device info: ' + JSON.stringify(deviceInfo));
-        var deviceConnectionString = 'HostName='+res.client._host+';DeviceId='+deviceInfo.deviceId+';SharedAccessKey='+deviceInfo.authentication.symmetricKey.primaryKey;
-        callback(null, deviceConnectionString);
-    });
+  registry.create(device, function(err, deviceInfo, res) {
+    if (err) console.log('error: ' + err.toString());
+    if (res) console.log('status: ' + res.statusCode + ' ' + res.statusMessage);
+    if (deviceInfo) console.log('device info: ' + JSON.stringify(deviceInfo));
+    var deviceConnectionString = 'HostName='+res.client._host+';DeviceId='+deviceInfo.deviceId+';SharedAccessKey='+deviceInfo.authentication.symmetricKey.primaryKey;
+    callback(null, deviceConnectionString);
+  });
 }
 
 function CreateDeviceFirmware(deviceconnectionstring, callback) {
