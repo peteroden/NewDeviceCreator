@@ -26,7 +26,7 @@ program
   .description('Log into Azure to create and manage IoT Hub services')
   .parse(process.argv);
 
-newLogin(true);
+newLogin(true,function(){});
 
 
 

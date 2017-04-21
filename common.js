@@ -1,4 +1,4 @@
-// Copyright (c) Microsoft. All rights reserved.
+// Copyright (c) Pete Roden. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 'use strict';
@@ -59,11 +59,16 @@ function configLoc() {
   }
 }
 
+/**
+ * get a new authentication token
+ * @param {boolean} persist determines if the token should be cached
+ * @param {*} callback 
+ */
 function newLogin(persist = false, callback) {
   msRestAzure.interactiveLogin(function(err, credentials) {
     if (err) {
       inputError(err);
-      return false;
+      callback(false);
     }
 
     printSuccess('Login successful.');
@@ -75,28 +80,28 @@ function newLogin(persist = false, callback) {
         fs.writeFile(sessionFilePath, JSON.stringify(credentials), function (err) {
           if (err) {
             inputError(err.toString());
-            return false;
+            callback(false);
+          } else {
+            callback(credentials);
           }
         });
       });
+    } else {
+      callback(credentials);
     }
-    return credentials;
   });
 }
 
-function getAuthToken(){
+/**
+ * Gets authtoken from cache or gets a new one
+ */
+function getAuthToken(callback){
   //check if saved token exists && if token is still valid
   var token = loadTokenFromUserFile();
-  if (token != false && token.expiry> now()) {
-    return token;
+  if (token != false) { //need to add a test to make sure token not expired
+    callback(token);
   } else {
-    token = newLogin();
-  }
-
-  if (token != false) {
-    return token;
-  } else {
-    return false;
+    newLogin(false, callback);
   }
 }
 
@@ -105,7 +110,7 @@ function loadTokenFromUserFile() {
   var loc = configLoc();
 
   try {
-    token = JSON.parse(fs.readFileSync(loc.dir + '/' + loc.file, 'utf8'));
+    var token = JSON.parse(fs.readFileSync(loc.dir + '/' + loc.file, 'utf8'));
   } catch (err) { // swallow file not found exception
     return false;
   }

@@ -21,6 +21,7 @@ var async = require('async');
 var inputError = require('./common.js').inputError;
 var printSuccess = require('./common.js').printSuccess;
 var configLoc = require('./common.js').configLoc;
+var getAuthToken = require('./common.js').getAuthToken;
 
 // SDK dependencies
 var msRestAzure = require('ms-rest-azure');
@@ -34,10 +35,11 @@ var info;
 program
   .description('Create an Azure IoT Hub environment.')
 
-  .usage('[options] [schema-json|schema-yaml]')
-  .option('-d, --device <connection-string>', 'Only create the device firmware')
-  .option('-c, --cloud', 'Only create the Azure services')
-  .option('-m, --mobile', 'Only create the mobile app')
+  .usage('[options] <schema-json|schema-yaml>')
+  .option('-a, --all', '(Default) Create the device, cloud, and mobile apps')
+  .option('-d, --device <connection-string>', 'Create the device firmware')
+  .option('-c, --cloud', 'Create the Azure services')
+  .option('-m, --mobile', 'Create the mobile app')
   .parse(process.argv);
 
 var randomIds = {};
@@ -46,23 +48,43 @@ var args = process.argv.slice(2);
 var doc = yaml.safeLoad(fse.readFileSync('charmin-schema.yaml', 'utf8'));
 var armClient;
 var cs;
+var buildall = (_.isUndefined(program.device) && _.isUndefined(program.cloud) && _.isUndefined(program.mobile)) || 
+                (_.every([program.device, program.cloud, program.mobile],true)) ||
+                (program.all == true);
 
+console.log(buildall)
 async.waterfall([
-  function(callback) { DeployCloud(callback); },
-  function(output, callback) { CreateFirstDevice(output, callback); },
-  function(output, callback) { CreateDeviceFirmware(output, callback); },
-  function(callback) { CreateMobileApp(); }
+  function(callback) {
+    if(buildall || program.cloud) {
+      getAuthToken(function(credentials) {
+        DeployIoTHub(credentials, '41e79933-b5c4-40a5-9136-2f63c72530d5', doc, callback);
+      });
+    } else {
+        callback();
+    }
+  },
+  function(output, callback) {
+    if (buildall) {
+        var iotHubConnectionString = output.iotHubConnectionString.value;
+    } else if (program.device) {
+      var iotHubConnectionString = program.device;
+    }
+    CreateDevice(iotHubConnectionString, _generateRandomId('FirstDevice-', randomIds), callback);
+  },
+  function(output, callback) {
+    CreateDeviceFirmware(output, callback); },
+  function(callback) { CreateMobileApp(callback); }
 ]
 );
 
-function CreateFirstDevice(output, callback) {
+function CreateDevice(iotHubConnectionString, deviceId, callback) {
   //var connectiostring = cs.iotHubConnectionString.value;
-  var connectionString = output.iotHubConnectionString.value;
-  var registry = iothub.Registry.fromConnectionString(connectionString);
+  //var connectionString = output.iotHubConnectionString.value;
+  var registry = iothub.Registry.fromConnectionString(iotHubConnectionString);
 
   // Create a new device
   var device = {
-    deviceId: _generateRandomId('FirstDevice-', randomIds)
+    "deviceId": deviceId
   };
 
   registry.create(device, function(err, deviceInfo, res) {
@@ -74,7 +96,7 @@ function CreateFirstDevice(output, callback) {
   });
 }
 
-function CreateDeviceFirmware(deviceconnectionstring, callback) {
+function CreateDeviceFirmware(deviceConnectionString, callback) {
     var declaration = '';
     var definition = '';
     var defaultModelName;
@@ -131,7 +153,7 @@ function CreateDeviceFirmware(deviceconnectionstring, callback) {
 
             fse.removeSync('DeviceFirmware/src/snippets');
             var top = fse.readFileSync('./DeviceTemplate-ESP8266/src/snippets/top.c').toString()
-                .replace(/%%CONNECTIONSTRING%%/g, deviceconnectionstring);
+                .replace(/%%CONNECTIONSTRING%%/g, deviceConnectionString);
 
             var bottom = fse.readFileSync('./DeviceTemplate-ESP8266/src/snippets/bottom.c').toString()
                 .replace(/%%NAMESPACE%%/g, doc.namespace.name)
@@ -151,15 +173,22 @@ function CreateMobileApp(callback) {
     callback();
 }
 
-function DeployCloud(callback) {
+/**
+ * Create IoT Hub environment based on schema description
+ * @param {DeviceTokenCredentials} credentials Token to use for authentication
+ * @param {string} subscriptionId subscription in which to create the IoT Hub environment
+ * @param {object} schema schema defining the methods, data, etc. to be used in the environment
+ * @param {*} callback 
+ */
+function DeployIoTHub(credentials, subscriptionId, schema, callback) {
     // Interactive Login 
-    msRestAzure.interactiveLogin(function(err, credentials, subscriptions) {
-        var armClient = new azureARMClient.ResourceManagementClient(credentials, '41e79933-b5c4-40a5-9136-2f63c72530d5');//args[1]);
-        var groupParameters = { location: doc.location, tags: { "IoTNamespace": doc.namespace.name } };
-        armClient.resourceGroups.createOrUpdate(doc.namespace.name, groupParameters, function(rg) {
+    //msRestAzure.interactiveLogin(function(err, credentials, subscriptions) {
+        var armClient = new azureARMClient.ResourceManagementClient(credentials, subscriptionId);
+        var groupParameters = { location: schema.location, tags: { "IoTNamespace": schema.namespace.name } };
+        armClient.resourceGroups.createOrUpdate(schema.namespace.name, groupParameters, function(rg) {
             var templateFilePath = path.join(__dirname, "IoT.json");
             var template = JSON.parse(fse.readFileSync(templateFilePath, 'utf8'));
-            var parameters = {"namespace": { "value": doc.namespace.name }};
+            var parameters = {"namespace": { "value": schema.namespace.name }};
             var deploymentParameters = {
                 "properties": {
                     "parameters": parameters,
@@ -168,8 +197,8 @@ function DeployCloud(callback) {
                 }
             };
             armClient.deployments.createOrUpdate(
-                doc.namespace.name, 
-                _generateRandomId(doc.namespace.name+'deployment', randomIds), 
+                schema.namespace.name, 
+                _generateRandomId(schema.namespace.name+'deployment', randomIds), 
                 deploymentParameters, 
                 function(error, result) {
                     console.log(result);
@@ -178,7 +207,7 @@ function DeployCloud(callback) {
                 }
             );
         });
-    });
+    //});
 }
 
 function _generateRandomId(prefix, exsitIds) {
