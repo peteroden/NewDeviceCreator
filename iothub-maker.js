@@ -7,15 +7,29 @@
 var program = require('commander');
 var packageJson = require('./package.json');
 
+
+/* global process */
+var program = require('commander');
+
 program
   .version(packageJson.version)
   .usage('[options] <command> [command-options] [command-args]')
-  .command('login', 'start a session with your Azure user')
-  .command('logout', 'terminate the current session with your Azure user')
-  .command('list', '(coming soon) list the IoT hub environments you have deployed')
-  .command('deploy', 'deploy iothub-maker web interface on public Azure Storage and Azure Function backend')
-  .command('create <schema-json> <device|cloud> ', 'create an IoT hub environment from a schema file')
-  .parse(process.argv);
 
+require('./command-create.js')(program);
+
+program.parse(process.argv);
+
+
+/*
+program
+  .version(packageJson.version)
+  .usage('[options] <command> [command-options] [command-args]')
+  .command('login', '(work in progress) start a session with your Azure user')
+  .command('logout', '(work in progress) terminate the current session with your Azure user')
+  .command('list', '(coming soon) list the IoT hub environments you have deployed')
+  .command('deploy', '(comining soon) deploy iothub-maker web interface on public Azure Storage and Azure Function backend')
+  .command('create [command-options] <schema-json|schema-yaml> <subscriptionId> ', 'create an IoT hub environment from a schema file')
+  .parse(process.argv);
+*/
 
 

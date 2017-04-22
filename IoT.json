@@ -246,7 +246,7 @@
                 "[resourceId('Microsoft.Storage/storageAccounts', variables('storageName'))]"
                 ],
                 "properties": {
-                    "FUNCTIONS_EXTENSION_VERSION": "1~",
+                    "FUNCTIONS_EXTENSION_VERSION": "~1",
                     "WEBSITE_CONTENTAZUREFILECONNECTIONSTRING": "[concat('DefaultEndpointsProtocol=https;EndpointSuffix=', parameters('storageEndpointSuffix'), ';AccountName=', variables('storageName'), ';AccountKey=', listKeys(variables('storageId'),'2015-05-01-preview').key1)]",
                     "WEBSITE_CONTENTSHARE": "[toLower(variables('funcName'))]",
                     "AzureWebJobsStorage": "[concat('DefaultEndpointsProtocol=https;EndpointSuffix=', parameters('storageEndpointSuffix'), ';AccountName=', variables('storageName'), ';AccountKey=', listKeys(variables('storageId'),'2015-05-01-preview').key1)]",

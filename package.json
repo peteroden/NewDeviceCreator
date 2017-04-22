@@ -1,6 +1,6 @@
 {
   "name": "iothub-maker",
-  "version": "1.0.0",
+  "version": "0.1.0",
   "description": "Azure IoT Hub Maker",
   "author": "Pete Roden",
   "main": "iothub-maker.js",
