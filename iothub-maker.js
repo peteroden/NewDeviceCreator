@@ -15,7 +15,7 @@ program
   .version(packageJson.version)
   .usage('[options] <command> [command-options] [command-args]')
 
-require('./command-create.js')(program);
+require('./command/create.js')(program);
 
 program.parse(process.argv);
 

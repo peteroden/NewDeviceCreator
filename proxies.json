@@ -1,0 +1,25 @@
+{
+    "proxies": {
+        "root": {
+            "matchCondition": {
+                "methods": [ "GET" ],
+                "route": "/"
+            },
+            "backendUri": "https://%STATIC_STORAGE_ACCOUNT%.blob.core.windows.net/%STATIC_CONTAINER%/index.html"
+        },
+        "index.html": {
+          "matchCondition": {
+                "methods": [ "GET" ],
+                "route": "/index.html"
+            },
+            "backendUri": "https://%STATIC_STORAGE_ACCOUNT%.blob.core.windows.net/%STATIC_CONTAINER%/index.html"
+        },
+        "lib": {
+          "matchCondition": {
+                "methods": [ "GET" ],
+                "route": "/lib/{*file}"
+            },
+            "backendUri": "https://%STATIC_STORAGE_ACCOUNT%.blob.core.windows.net/%STATIC_CONTAINER%/lib/{*file}"
+        }
+    }
+}

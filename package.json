@@ -4,7 +4,10 @@
   "description": "Azure IoT Hub Maker",
   "author": "Pete Roden",
   "main": "iothub-maker.js",
-  "bin": "iothub-maker.js",
+  "bin": {
+    "iothub-maker": "iothub-maker.js",
+    "iothub-maker-create": "command/create.js"
+  },
   "license": "MIT",
   "dependencies": {
     "async": "^2.3.0",

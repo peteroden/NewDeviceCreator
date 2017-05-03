@@ -5,7 +5,6 @@
 'use strict';
 
 var program = require('commander');
-var packageJson = require('./package.json');
 
 var info;
 

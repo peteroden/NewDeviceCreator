@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 // Copyright (c) Pete Roden. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
@@ -17,9 +18,6 @@ var fse = require('fs-extra');
 var async = require('async');
 
 // Local dependencies
-//var inputError = require('./common.js').inputError;
-//var printSuccess = require('./common.js').printSuccess;
-//var configLoc = require('./common.js').configLoc;
 var getAuthToken = require('./lib/common.js').getAuthToken;
 var generateRandomId = require('./lib/common.js').generateRandomId;
 var DeployIoTHub = require('./lib/iothub-maker-create.js').DeployIoTHub;
