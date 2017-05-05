@@ -13,7 +13,7 @@ var program = require('commander');
 
 program
   .version(packageJson.version)
-  .usage('[options] <command> [command-options] [command-args]')
+  .usage('[options] <command> [command-options] [command-args]');
 
 require('./command/create.js')(program);
 

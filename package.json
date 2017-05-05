@@ -12,9 +12,11 @@
   "dependencies": {
     "async": "^2.3.0",
     "azure-arm-resource": "^2.0.0-preview",
+    "azure-function-express": "^1.2.2",
     "azure-iothub": "^1.1.9",
     "colors-tmpl": "^1.0.0",
     "commander": "^2.9.0",
+    "express": "^4.15.2",
     "fs-extra": "^2.1.2",
     "js-yaml": "^3.8.3",
     "lodash": "^4.17.4",
